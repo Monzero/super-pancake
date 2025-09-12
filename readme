@@ -1,0 +1,38 @@
+We start with asking for standing input files. 
+
+Input schema details should be in one excel. There is no limit to how many schemas can be there. The structure of the data should be as follows:
+Sheet 1: Schema1_Schema → Schema definition
+Sheet 2: Schema1_Data   → Sample data  
+Sheet 3: Schema2_Schema → Schema definition
+Sheet 4: Schema2_Data   → Sample data
+... (pattern continues)
+
+There should be separate target schema file :
+Sheet 1: Target_Schema → Target definition
+Sheet 2: Target_Data   → Target sample
+
+and then there is 3rd file which is really to be used for validation and also guide the program what should be the format of the output:
+
+Sheet 1: Mappings → target_field | source_fields | transform_dsl | example_expression | notes
+
+Profiler
+
+Profller: examining and analyzing source data files to understand their structure, content patterns, and data quality characteristics.
+•  DATA_TYPE: What type of data each column contains (numeric, categorical, etc.) 
+•  RECORDS: Total number of records/rows 
+•  POPULATION_PERCENTAGE: How much of the data is populated vs empty 
+•  DISTINCT_COUNT: Number of unique values 
+•  NULL_COUNT: Number of empty/missing values 
+•  MOST_COMMON_VALUES: Frequently occurring values in each field 
+•  MIN_LENGTH / MAX_LENGTH: Size ranges for text fields 
+•  MIN_VALUE / MAX_VALUE: Value ranges for numeric fields 
+•  LEADING_TRAILING_SPACES_COUNT: Data quality issues
+
+Professional Excel template with multiple sheets:
+
+Field_Profiles: Complete profiling metrics for every field
+Schema_Summary: Summary statistics by schema
+Data_Type_Distribution: Analysis of data types
+Quality_Issues: Fields with data quality problems
+Metadata: Generation info and overall statistics
+
