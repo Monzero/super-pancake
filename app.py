@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List, Dict, Any
 
@@ -8,6 +9,21 @@ from error_handler import ErrorCollector, DataError
 from project_manager import ProjectRegistry, Project
 from schema_validator import validate_schema_data
 from upload_workflow import upload_workbook
+
+
+st.set_page_config(layout="wide")
+st.markdown(
+    "<style>" + Path("styles.css").read_text() + "</style>",
+    unsafe_allow_html=True,
+)
+
+
+def styled_button(label: str, key: str | None = None, container=st) -> bool:
+    """Render a button wrapped in a themed container."""
+    container.markdown('<div class="primary-button">', unsafe_allow_html=True)
+    clicked = container.button(label, key=key)
+    container.markdown("</div>", unsafe_allow_html=True)
+    return clicked
 
 
 # --- Navigation helpers ----------------------------------------------------
@@ -23,17 +39,20 @@ def _set_page(page: str, project: str | None = None) -> None:
 
 def landing_page() -> None:
     """Initial landing page with navigation options."""
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
     st.title("Welcome")
-    if st.button("Open Existing Project"):
+    if styled_button("Open Existing Project"):
         _set_page("list_projects")
         st.rerun()
-    if st.button("Create New Project"):
+    if styled_button("Create New Project"):
         _set_page("create_project")
         st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def list_projects(registry: ProjectRegistry) -> None:
     """Display list of existing projects."""
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
     st.title("Project Dashboard")
 
     projects = registry.list_projects()
@@ -43,13 +62,15 @@ def list_projects(registry: ProjectRegistry) -> None:
             f"{project.name} - sources: {project.num_source_schemas}, "
             f"target: {project.target_schema}"
         )
-        if cols[1].button("Open", key=f"open_{project.name}"):
+        if styled_button("Open", key=f"open_{project.name}", container=cols[1]):
             _set_page("project", project.name)
             st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def create_project(registry: ProjectRegistry) -> None:
     """Form to create a new project."""
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
     st.title("Add Project")
     with st.form("add_project_form"):
         name = st.text_input("Name")
@@ -57,7 +78,9 @@ def create_project(registry: ProjectRegistry) -> None:
             "Number of source schemas", min_value=0, step=1, value=0
         )
         target = st.text_input("Target schema")
+        st.markdown('<div class="primary-button">', unsafe_allow_html=True)
         submitted = st.form_submit_button("Create")
+        st.markdown("</div>", unsafe_allow_html=True)
         if submitted:
             try:
                 registry.add_project(
@@ -72,6 +95,7 @@ def create_project(registry: ProjectRegistry) -> None:
                 st.rerun()
             except ValueError as exc:
                 st.error(str(exc))
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def _load_json(upload) -> List[Dict[str, Any]]:
@@ -85,16 +109,18 @@ def _load_json(upload) -> List[Dict[str, Any]]:
 
 def project_config(registry: ProjectRegistry, project_name: str) -> None:
     """Show project details and provide upload/validation widgets."""
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
     project = next(
         (p for p in registry.list_projects() if p.name == project_name), None
     )
     if not project:
         st.error("Project not found")
-        if st.button("Back"):
+        if styled_button("Back"):
             _set_page("list_projects")
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
         return
-    if st.sidebar.button("Back to projects"):
+    if styled_button("Back to projects", container=st.sidebar):
         _set_page("list_projects")
         st.rerun()
     st.title(f"Project: {project.name}")
@@ -109,7 +135,7 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
 
     collector = ErrorCollector()
 
-    if st.button("Validate Sample Data"):
+    if styled_button("Validate Sample Data"):
         schema = _load_json(src_schema)
         data = _load_json(sample_data)
         valid, errors = validate_schema_data(schema, data)
@@ -122,7 +148,7 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
             for err in collector.errors:
                 st.error(str(err))
 
-    if st.button("Process Workbook") and sample_data is not None:
+    if styled_button("Process Workbook") and sample_data is not None:
         with NamedTemporaryFile(delete=False) as tmp:
             tmp.write(sample_data.getvalue())
             tmp_path = tmp.name
@@ -135,6 +161,7 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
             )
             for err in collector.errors:
                 st.error(str(err))
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # --- Application entry point -----------------------------------------------
