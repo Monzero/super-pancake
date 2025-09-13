@@ -2,6 +2,7 @@ import json
 from tempfile import NamedTemporaryFile
 from typing import List, Dict, Any
 
+import pandas as pd
 import streamlit as st
 
 from error_handler import ErrorCollector, DataError
@@ -41,29 +42,51 @@ def landing_page() -> None:
         _set_page("list_projects")
         st.rerun()
     if create_clicked:
-        _set_page("create_project")
+        _set_page("list_projects")
         st.rerun()
 
 
 def list_projects(registry: ProjectRegistry) -> None:
     """Display list of existing projects."""
     st.title("Project Dashboard")
+    st.header("Existing Projects")
 
     projects = registry.list_projects()
-    for project in projects:
-        cols = st.columns([4, 1])
-        cols[0].write(
-            f"{project.name} - sources: {project.num_source_schemas}, "
-            f"target: {project.target_schema}"
+    if projects:
+        data = [
+            {
+                "Name": p.name,
+                "Sources": p.num_source_schemas,
+                "Target": p.target_schema,
+            }
+            for p in projects
+        ]
+        df = pd.DataFrame(data)
+        df["Open"] = "Open"
+        edited = st.data_editor(
+            df,
+            column_config={
+                "Name": st.column_config.TextColumn("Name", disabled=True),
+                "Sources": st.column_config.NumberColumn("Sources", disabled=True),
+                "Target": st.column_config.TextColumn("Target", disabled=True),
+                "Open": st.column_config.ButtonColumn("Open"),
+            },
+            hide_index=True,
         )
-        if cols[1].button("Open", key=f"open_{project.name}"):
-            _set_page("project", project.name)
-            st.rerun()
+        for idx, count in enumerate(edited["Open"]):
+            if count:
+                _set_page("project", projects[idx].name)
+                st.rerun()
+    else:
+        st.info("No projects available")
+
+    st.divider()
+    st.header("Add Project")
+    create_project(registry)
 
 
 def create_project(registry: ProjectRegistry) -> None:
     """Form to create a new project."""
-    st.title("Add Project")
     with st.form("add_project_form"):
         name = st.text_input("Name")
         num_sources = st.number_input(
@@ -162,8 +185,6 @@ def main() -> None:
         landing_page()
     elif page == "list_projects":
         list_projects(registry)
-    elif page == "create_project":
-        create_project(registry)
     elif page == "project":
         project_name = st.session_state.get("selected_project", "")
         project_config(registry, project_name)
