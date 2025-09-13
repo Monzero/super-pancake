@@ -1,15 +1,16 @@
-We start with asking for standing input files. 
+We start with letting user make a project. In the project, we should first ask project names, the configuration, data owners (may be not MVP), like adding names of all domains (we can think of setting project level configuration)
 
-Input schema details should be in one excel. There is no limit to how many schemas can be there. The structure of the data should be as follows:
-Sheet 1: Schema1_Schema → Schema definition
-Sheet 2: Schema1_Data   → Sample data  
-Sheet 3: Schema2_Schema → Schema definition
-Sheet 4: Schema2_Data   → Sample data
-... (pattern continues)
+Then depending on the input domains you have configured, you have option to upload its schema and sample data (let sample data be optional for now) Open question: can we make it either or?
+
+There is no limit to how many schemas can be there. The structure of the data should be as follows: (Check 01_input folder)
+file 1: Schema1_Schema → Schema definition -> field_name | description | data_type |	length |	nullable |	primary_key |	foreign_key_ref |	example_values |	tags
+file 2: Schema1_Data   → Sample data  -> Depending on field_names suggested in schema file (could be a control to check, also check the data type, length etc)
+
+Question: As long as we have example values, do we care for sample file? 
 
 There should be separate target schema file :
-Sheet 1: Target_Schema → Target definition
-Sheet 2: Target_Data   → Target sample
+Sheet 1: Target_Schema → Target definition -> field_name | description | data_type |	length |	nullable |	primary_key |	foreign_key_ref |	example_values |	tags
+Sheet 2: Target_Data   → Target sample -> Depending on field_names suggested in schema file (could be a control to check, also check the data type, length etc)
 
 and then there is 3rd file which is really to be used for validation and also guide the program what should be the format of the output:
 
