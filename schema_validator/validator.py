@@ -1,6 +1,10 @@
 """Validation logic for schemas and sample data."""
 from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Optional, Set
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class ValidationError(Exception):
@@ -65,12 +69,18 @@ def validate_schema_data(
     fk_reference = fk_reference or {}
     errors: Dict[str, List[str]] = {}
 
-    # Precompute data column lists for efficiency
+    # Stage 1: Precompute column values for efficiency.
     column_values: Dict[str, List[Any]] = {name: [] for name in [f["field_name"] for f in schema]}
     for row in data:
         for name in column_values:
             column_values[name].append(row.get(name))
+    logger.debug(
+        "Precomputed column values for %d fields across %d rows",
+        len(column_values),
+        len(data),
+    )
 
+    # Stage 2: Iterate through each field performing validation checks.
     for field in schema:
         name = field["field_name"]
         expected_type = field.get("data_type", "string")
@@ -81,8 +91,9 @@ def validate_schema_data(
         field_errors: List[str] = []
 
         values = column_values[name]
+        logger.debug("Validating field '%s'", name)
 
-        # Validate individual values
+        # Validate individual values (type, nullability, length)
         for i, value in enumerate(values):
             if not _check_type(value, expected_type):
                 field_errors.append(f"Row {i}: value {value!r} does not match type {expected_type}")
@@ -93,6 +104,7 @@ def validate_schema_data(
                     f"Row {i}: value {value!r} exceeds max length {length}"
                 )
 
+        # Stage 3: Constraint enforcement
         # Primary key constraint: uniqueness and non-null
         if is_primary:
             non_null_values = [v for v in values if not _is_null(v)]
@@ -109,9 +121,22 @@ def validate_schema_data(
                     field_errors.append(
                         f"Row {i}: value {value!r} not present in foreign key reference"
                     )
-
         if field_errors:
+            logger.debug(
+                "Field '%s' failed validation with %d error(s)",
+                name,
+                len(field_errors),
+            )
             errors[name] = field_errors
+        else:
+            logger.debug("Field '%s' passed validation", name)
 
     is_valid = not errors
+    if is_valid:
+        logger.info("Schema data validation completed successfully")
+    else:
+        logger.info(
+            "Schema data validation found errors in %d field(s)",
+            len(errors),
+        )
     return is_valid, errors
