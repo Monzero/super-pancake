@@ -76,19 +76,19 @@ def list_projects(registry: ProjectRegistry) -> None:
             for p in projects
         ]
         df = pd.DataFrame(data)
-        df["Open"] = "Open"
+        df["Open"] = False
         edited = st.data_editor(
             df,
             column_config={
                 "Name": st.column_config.TextColumn("Name", disabled=True),
                 "Sources": st.column_config.NumberColumn("Sources", disabled=True),
                 "Target": st.column_config.TextColumn("Target", disabled=True),
-                "Open": st.column_config.ButtonColumn("Open"),
+                "Open": st.column_config.CheckboxColumn("Open"),
             },
             hide_index=True,
         )
-        for idx, count in enumerate(edited["Open"]):
-            if count:
+        for idx, open_flag in enumerate(edited["Open"]):
+            if open_flag:
                 _set_page("project", projects[idx].name)
                 st.rerun()
     else:
