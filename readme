@@ -28,11 +28,17 @@ Profller: examining and analyzing source data files to understand their structur
 •  MIN_VALUE / MAX_VALUE: Value ranges for numeric fields 
 •  LEADING_TRAILING_SPACES_COUNT: Data quality issues
 
-Professional Excel template with multiple sheets:
+This could only be example, as profilers we should be able to get more attributes. 
 
-Field_Profiles: Complete profiling metrics for every field
+Output of profiler
+
+JSON template with multiple sheets: (TBD)
+
+source_schema_structure: all fields of all tables including their connection details
+Field_Profiles: Complete profiling metrics for every field (including target)
 Schema_Summary: Summary statistics by schema
-Data_Type_Distribution: Analysis of data types
-Quality_Issues: Fields with data quality problems
-Metadata: Generation info and overall statistics
+Quality_Issues: Fields with data quality problems (for example if the sample data doesnt match the description)
+
+
+
 
