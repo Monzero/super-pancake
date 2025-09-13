@@ -22,8 +22,17 @@ def _set_page(page: str, project: str | None = None) -> None:
 
 # --- Page implementations ---------------------------------------------------
 
-def project_dashboard(registry: ProjectRegistry) -> None:
-    """Display list of projects and allow creation of new ones."""
+def landing_page() -> None:
+    """Initial landing page with navigation options."""
+    st.title("Welcome")
+    if st.button("Open Existing Project"):
+        _set_page("list_projects")
+    if st.button("Create New Project"):
+        _set_page("create_project")
+
+
+def list_projects(registry: ProjectRegistry) -> None:
+    """Display list of existing projects."""
     st.title("Project Dashboard")
 
     projects = registry.list_projects()
@@ -36,7 +45,10 @@ def project_dashboard(registry: ProjectRegistry) -> None:
         if cols[1].button("Open", key=f"open_{project.name}"):
             _set_page("project", project.name)
 
-    st.subheader("Add Project")
+
+def create_project(registry: ProjectRegistry) -> None:
+    """Form to create a new project."""
+    st.title("Add Project")
     with st.form("add_project_form"):
         name = st.text_input("Name")
         num_sources = st.number_input(
@@ -54,7 +66,7 @@ def project_dashboard(registry: ProjectRegistry) -> None:
                     )
                 )
                 st.success(f"Project '{name}' added")
-                st.experimental_rerun()
+                _set_page("list_projects")
             except ValueError as exc:
                 st.error(str(exc))
 
@@ -76,10 +88,10 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
     if not project:
         st.error("Project not found")
         if st.button("Back"):
-            _set_page("dashboard")
+            _set_page("list_projects")
         return
 
-    st.sidebar.button("Back to projects", on_click=_set_page, args=["dashboard"])
+    st.sidebar.button("Back to projects", on_click=_set_page, args=["list_projects"])
     st.title(f"Project: {project.name}")
     st.write(f"Source schemas: {project.num_source_schemas}")
     st.write(f"Target schema: {project.target_schema}")
@@ -125,11 +137,15 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
 def main() -> None:
     """Streamlit application entry point."""
     if "page" not in st.session_state:
-        st.session_state.page = "dashboard"
+        st.session_state.page = "landing"
     registry = ProjectRegistry()
     page = st.session_state.page
-    if page == "dashboard":
-        project_dashboard(registry)
+    if page == "landing":
+        landing_page()
+    elif page == "list_projects":
+        list_projects(registry)
+    elif page == "create_project":
+        create_project(registry)
     elif page == "project":
         project_name = st.session_state.get("selected_project", "")
         project_config(registry, project_name)
