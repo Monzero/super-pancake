@@ -37,16 +37,21 @@ def validate_workbook(path: str) -> None:
         raise WorkbookValidationError(f"Unable to open workbook: {exc}") from exc
 
     try:
+        # Detect missing required sheets
         missing = [s for s in REQUIRED_SHEETS if s not in wb.sheetnames]
         if missing:
+            print(f"Missing required sheet(s): {missing}")
             raise WorkbookValidationError(
                 f"Workbook missing required sheet(s): {', '.join(missing)}"
             )
 
         schema_ws = wb["Schema"]
+        # Retrieve header row from Schema sheet
         header = _get_header(next(schema_ws.iter_rows(min_row=1, max_row=1)))
+        # Detect missing required schema columns
         missing_cols = [c for c in REQUIRED_SCHEMA_COLUMNS if c not in header]
         if missing_cols:
+            print(f"Missing required schema column(s): {missing_cols}")
             raise WorkbookValidationError(
                 "Schema sheet missing required column(s): "
                 + ", ".join(missing_cols)
@@ -60,8 +65,12 @@ def validate_workbook(path: str) -> None:
         ]
 
         data_ws = wb["Data"]
+        # Retrieve header row from Data sheet
         data_header = _get_header(next(data_ws.iter_rows(min_row=1, max_row=1)))
+        # Compare Data sheet headers with schema field names
         if data_header != field_names:
+            print(f"Schema field names: {field_names}")
+            print(f"Data sheet headers: {data_header}")
             raise WorkbookValidationError(
                 "Data sheet headers do not match field names defined in Schema"
             )
