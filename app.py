@@ -13,7 +13,12 @@ from upload_workflow import upload_workbook
 # --- Navigation helpers ----------------------------------------------------
 
 def _set_page(page: str, project: str | None = None) -> None:
-    """Update the current page and optional selected project."""
+    """Update the current page and optional selected project.
+
+    The function mutates :data:`st.session_state` but does **not** trigger a
+    rerun. Callers should invoke :func:`st.rerun` after changing the state to
+    immediately update the UI.
+    """
     st.session_state.page = page
     if project is not None:
         st.session_state.selected_project = project
