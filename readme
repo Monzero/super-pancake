@@ -43,3 +43,18 @@ Quality_Issues: Fields with data quality problems (for example if the sample dat
 
 
 
+
+## Profiler output extensions
+
+The project configuration models expose placeholders for storing profiler
+results.
+
+* ``schema.py`` defines ``TableSchema`` and ``FieldSchema`` classes that carry
+  stable ``id`` values so profiler metrics can be matched back to the
+  original definitions.
+* ``project_config.py`` provides ``field_profiles`` and ``table_profiles``
+  dictionaries. Each profile maintains a flexible ``statistics`` mapping
+  where new metrics can be added without changing existing code.
+
+Future profilers may introduce additional structures or keys inside these
+mappings as more types of analysis are supported.
