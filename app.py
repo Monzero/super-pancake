@@ -17,7 +17,6 @@ def _set_page(page: str, project: str | None = None) -> None:
     st.session_state.page = page
     if project is not None:
         st.session_state.selected_project = project
-    st.experimental_rerun()
 
 
 # --- Page implementations ---------------------------------------------------
@@ -27,8 +26,10 @@ def landing_page() -> None:
     st.title("Welcome")
     if st.button("Open Existing Project"):
         _set_page("list_projects")
+        st.rerun()
     if st.button("Create New Project"):
         _set_page("create_project")
+        st.rerun()
 
 
 def list_projects(registry: ProjectRegistry) -> None:
@@ -44,6 +45,7 @@ def list_projects(registry: ProjectRegistry) -> None:
         )
         if cols[1].button("Open", key=f"open_{project.name}"):
             _set_page("project", project.name)
+            st.rerun()
 
 
 def create_project(registry: ProjectRegistry) -> None:
@@ -67,6 +69,7 @@ def create_project(registry: ProjectRegistry) -> None:
                 )
                 st.success(f"Project '{name}' added")
                 _set_page("list_projects")
+                st.rerun()
             except ValueError as exc:
                 st.error(str(exc))
 
@@ -89,9 +92,11 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
         st.error("Project not found")
         if st.button("Back"):
             _set_page("list_projects")
+            st.rerun()
         return
-
-    st.sidebar.button("Back to projects", on_click=_set_page, args=["list_projects"])
+    if st.sidebar.button("Back to projects"):
+        _set_page("list_projects")
+        st.rerun()
     st.title(f"Project: {project.name}")
     st.write(f"Source schemas: {project.num_source_schemas}")
     st.write(f"Target schema: {project.target_schema}")
