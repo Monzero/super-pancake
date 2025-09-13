@@ -33,10 +33,10 @@ def landing_page() -> None:
         create_clicked = st.button("Create New Project", use_container_width=True)
 
     if open_clicked:
-        _set_page("list_projects")
+        st.session_state.page = "list_projects"
         st.rerun()
     if create_clicked:
-        _set_page("create_project")
+        st.session_state.page = "create_project"
         st.rerun()
 
 
