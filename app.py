@@ -23,11 +23,19 @@ def _set_page(page: str, project: str | None = None) -> None:
 
 def landing_page() -> None:
     """Initial landing page with navigation options."""
-    st.title("Welcome")
-    if st.button("Open Existing Project"):
+    st.set_page_config(page_title="Schema Mapper", page_icon="🗺️")
+    st.title("Schema Mapper")
+    st.markdown("Map and manage your project's schemas with ease.")
+
+    center_col = st.columns([1, 1, 1])[1]
+    with center_col:
+        open_clicked = st.button("Open Existing Project", use_container_width=True)
+        create_clicked = st.button("Create New Project", use_container_width=True)
+
+    if open_clicked:
         _set_page("list_projects")
         st.rerun()
-    if st.button("Create New Project"):
+    if create_clicked:
         _set_page("create_project")
         st.rerun()
 
