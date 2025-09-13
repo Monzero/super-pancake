@@ -1,6 +1,7 @@
 import json
 from tempfile import NamedTemporaryFile
 from typing import List, Dict, Any
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -9,6 +10,12 @@ from error_handler import ErrorCollector, DataError
 from project_manager import ProjectRegistry, Project
 from schema_validator import validate_schema_data
 from upload_workflow import upload_workbook
+
+
+st.set_page_config(layout="wide", page_title="Schema Mapper", page_icon="🗺️")
+st.markdown(
+    "<style>" + Path("styles.css").read_text() + "</style>", unsafe_allow_html=True
+)
 
 
 # --- Navigation helpers ----------------------------------------------------
@@ -29,14 +36,21 @@ def _set_page(page: str, project: str | None = None) -> None:
 
 def landing_page() -> None:
     """Initial landing page with navigation options."""
-    st.set_page_config(page_title="Schema Mapper", page_icon="🗺️")
     st.title("Schema Mapper")
     st.markdown("Map and manage your project's schemas with ease.")
 
     center_col = st.columns([1, 1, 1])[1]
     with center_col:
-        open_clicked = st.button("Open Existing Project", use_container_width=True)
-        create_clicked = st.button("Create New Project", use_container_width=True)
+        st.markdown('<div class="primary-button">', unsafe_allow_html=True)
+        open_clicked = st.button(
+            "Open Existing Project", use_container_width=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('<div class="secondary-button">', unsafe_allow_html=True)
+        create_clicked = st.button(
+            "Create New Project", use_container_width=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if open_clicked:
         _set_page("list_projects")
@@ -93,7 +107,9 @@ def create_project(registry: ProjectRegistry) -> None:
             "Number of source schemas", min_value=0, step=1, value=0
         )
         target = st.text_input("Target schema")
+        st.markdown('<div class="primary-button">', unsafe_allow_html=True)
         submitted = st.form_submit_button("Create")
+        st.markdown("</div>", unsafe_allow_html=True)
         if submitted:
             try:
                 registry.add_project(
@@ -126,13 +142,17 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
     )
     if not project:
         st.error("Project not found")
+        st.markdown('<div class="secondary-button">', unsafe_allow_html=True)
         if st.button("Back"):
             _set_page("list_projects")
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
         return
+    st.sidebar.markdown('<div class="secondary-button">', unsafe_allow_html=True)
     if st.sidebar.button("Back to projects"):
         _set_page("list_projects")
         st.rerun()
+    st.sidebar.markdown("</div>", unsafe_allow_html=True)
     st.title(f"Project: {project.name}")
     st.write(f"Source schemas: {project.num_source_schemas}")
     st.write(f"Target schema: {project.target_schema}")
@@ -145,6 +165,7 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
 
     collector = ErrorCollector()
 
+    st.markdown('<div class="primary-button">', unsafe_allow_html=True)
     if st.button("Validate Sample Data"):
         schema = _load_json(src_schema)
         data = _load_json(sample_data)
@@ -154,10 +175,14 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
         else:
             for field, msgs in errors.items():
                 for msg in msgs:
-                    collector.add_error(DataError(field_name=field, row_number=None, message=msg))
+                    collector.add_error(
+                        DataError(field_name=field, row_number=None, message=msg)
+                    )
             for err in collector.errors:
                 st.error(str(err))
+    st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown('<div class="primary-button">', unsafe_allow_html=True)
     if st.button("Process Workbook") and sample_data is not None:
         with NamedTemporaryFile(delete=False) as tmp:
             tmp.write(sample_data.getvalue())
@@ -171,6 +196,7 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
             )
             for err in collector.errors:
                 st.error(str(err))
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # --- Application entry point -----------------------------------------------
