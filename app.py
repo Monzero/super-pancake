@@ -2,6 +2,7 @@ import json
 from tempfile import NamedTemporaryFile
 from typing import List, Dict, Any
 
+import pandas as pd
 import streamlit as st
 
 from error_handler import ErrorCollector, DataError
@@ -25,39 +26,59 @@ def landing_page() -> None:
     """Initial landing page with navigation options."""
     st.title("Welcome")
     if st.button("Open Existing Project"):
-        _set_page("list_projects")
+        _set_page("project_dashboard")
         st.rerun()
     if st.button("Create New Project"):
-        _set_page("create_project")
+        _set_page("project_dashboard")
         st.rerun()
 
 
-def list_projects(registry: ProjectRegistry) -> None:
-    """Display list of existing projects."""
+def project_dashboard(registry: ProjectRegistry) -> None:
+    """Display existing projects and allow creation of new ones."""
     st.title("Project Dashboard")
 
+    st.header("Existing Projects")
     projects = registry.list_projects()
-    for project in projects:
-        cols = st.columns([4, 1])
-        cols[0].write(
-            f"{project.name} - sources: {project.num_source_schemas}, "
-            f"target: {project.target_schema}"
+    if projects:
+        data = [
+            {
+                "Name": p.name,
+                "Sources": p.num_source_schemas,
+                "Target": p.target_schema,
+                "Open": False,
+            }
+            for p in projects
+        ]
+        df = pd.DataFrame(data)
+        edited_df = st.data_editor(
+            df,
+            column_config={
+                "Open": st.column_config.ButtonColumn(
+                    label="Open",
+                    help="Open project",
+                    icon="📂",
+                )
+            },
+            hide_index=True,
+            key="projects_table",
         )
-        if cols[1].button("Open", key=f"open_{project.name}"):
-            _set_page("project", project.name)
-            st.rerun()
+        for _, row in edited_df.iterrows():
+            if row.get("Open"):
+                _set_page("project", row["Name"])
+                st.rerun()
+    else:
+        st.info("No projects yet.")
 
+    st.divider()
 
-def create_project(registry: ProjectRegistry) -> None:
-    """Form to create a new project."""
-    st.title("Add Project")
+    st.header("Add Project")
     with st.form("add_project_form"):
         name = st.text_input("Name")
         num_sources = st.number_input(
             "Number of source schemas", min_value=0, step=1, value=0
         )
         target = st.text_input("Target schema")
-        submitted = st.form_submit_button("Create")
+        submitted = st.form_submit_button("Create", help="Create project")
         if submitted:
             try:
                 registry.add_project(
@@ -68,7 +89,7 @@ def create_project(registry: ProjectRegistry) -> None:
                     )
                 )
                 st.success(f"Project '{name}' added")
-                _set_page("list_projects")
+                _set_page("project_dashboard")
                 st.rerun()
             except ValueError as exc:
                 st.error(str(exc))
@@ -91,11 +112,11 @@ def project_config(registry: ProjectRegistry, project_name: str) -> None:
     if not project:
         st.error("Project not found")
         if st.button("Back"):
-            _set_page("list_projects")
+            _set_page("project_dashboard")
             st.rerun()
         return
     if st.sidebar.button("Back to projects"):
-        _set_page("list_projects")
+        _set_page("project_dashboard")
         st.rerun()
     st.title(f"Project: {project.name}")
     st.write(f"Source schemas: {project.num_source_schemas}")
@@ -147,10 +168,8 @@ def main() -> None:
     page = st.session_state.page
     if page == "landing":
         landing_page()
-    elif page == "list_projects":
-        list_projects(registry)
-    elif page == "create_project":
-        create_project(registry)
+    elif page == "project_dashboard":
+        project_dashboard(registry)
     elif page == "project":
         project_name = st.session_state.get("selected_project", "")
         project_config(registry, project_name)
