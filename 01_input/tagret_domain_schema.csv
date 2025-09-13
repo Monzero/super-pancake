@@ -1,0 +1,9 @@
+﻿field_name,description,data_type,length,nullable,derived,example_values,tags
+policy_member_key,Composite key for policy-member relationship,STRING,100,FALSE,TRUE,POL-784512|c3f1a9d0-12ab-4e5f-9c88-1a2b3c4d5e6f,"identifier,composite"
+member_full_name,"Member full name in 'First Last' format, trimmed and title-cased",STRING,120,FALSE,TRUE,Anita Sharma,"pii,name,format"
+dob_year,Four-digit year extracted from date_of_birth,INT,,FALSE,TRUE,1990,"date,year"
+age_years,Age in whole years computed from date_of_birth at time of processing,INT,,TRUE,TRUE,35,"derived,age"
+gender_description,Expanded gender description mapped from gender_code,STRING,16,TRUE,TRUE,Female,"code,map"
+address_city_upper,City of residence uppercased and trimmed,STRING,60,TRUE,TRUE,PUNE,"address,format"
+payer_contact,Concatenation of payer_name and contact_phone for display,STRING,180,TRUE,TRUE,Acme Health Insurance Co. | +1-800-555-0123,"contact,display"
+plan_tier,"Tier extracted from plan_name or plan_id (e.g., GOLD/SILVER/PLATINUM)",STRING,20,TRUE,TRUE,GOLD,"plan,normalize"

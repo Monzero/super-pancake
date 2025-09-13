@@ -1,0 +1,9 @@
+﻿target_field,source_fields,transform_dsl,example_expression,notes
+policy_member_key,"Member.policy_id, Member.member_id","concat(Member.policy_id, '|', Member.member_id)","CONCAT(policy_id, '|', member_id)",Ensure both parts are non-null; otherwise generate a surrogate key or flag.
+member_full_name,"Member.first_name, Member.last_name","concat_ws(' ', titlecase(trim(first_name)), titlecase(trim(last_name)))",INITCAP(TRIM(first_name)) || ' ' || INITCAP(TRIM(last_name)),Handle missing last_name; collapse multiple spaces.
+dob_year,Member.date_of_birth,year(date_of_birth),YEAR(date_of_birth),Require ISO date; validate range (1900..current_year).
+age_years,Member.date_of_birth,"years_between(current_date(), date_of_birth) → floor","FLOOR(DATEDIFF(current_date(), date_of_birth)/365.25)",Timezone-safe; for exactness consider month/day comparison.
+gender_description,Member.gender_code,"map_code(gender_code, {'M':'Male','F':'Female','O':'Other','U':'Unknown'})",CASE gender_code WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' WHEN 'O' THEN 'Other' ELSE 'Unknown' END,Maintain code list in KB; treat null as 'Unknown'.
+address_city_upper,Member.city,upper(trim(city)),UPPER(TRIM(city)),Normalize whitespace and diacritics if needed.
+payer_contact,"Payer.payer_name, Payer.contact_phone","concat_ws(' | ', payer_name, contact_phone)",payer_name || ' | ' || contact_phone,"If phone missing, omit delimiter; consider E.164 validation."
+plan_tier,"Payer.plan_name, Payer.plan_id","extract_regex(coalesce(plan_name, plan_id), '(?i)(GOLD|SILVER|PLATINUM|BRONZE)') → upper","UPPER(REGEXP_EXTRACT(COALESCE(plan_name, plan_id), '(?i)(GOLD|SILVER|PLATINUM|BRONZE)', 1))",Fallback: map via KB if regex fails.
