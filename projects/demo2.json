@@ -1,0 +1,30 @@
+{
+  "name": "demo2",
+  "description": "demo2",
+  "created_at": "2025-09-15T10:54:01.002428",
+  "updated_at": "2025-09-15T10:54:29.207457",
+  "input_schema_names": [
+    "payer",
+    "member"
+  ],
+  "target_schema_name": "target",
+  "data_owners": [],
+  "project_files": [
+    {
+      "schema_name": "payer",
+      "file_type": "schema",
+      "original_filename": "payer_domain_schema.csv",
+      "stored_filename": "payer_schema_5e428b39.csv",
+      "uploaded_at": "2025-09-15T10:54:17.151489",
+      "file_size": 10798
+    },
+    {
+      "schema_name": "payer",
+      "file_type": "sample",
+      "original_filename": "payer_domain_sample.csv",
+      "stored_filename": "payer_sample_241b7392.csv",
+      "uploaded_at": "2025-09-15T10:54:29.207440",
+      "file_size": 9624
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+# Core Dependencies
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization Dependencies
+plotly>=5.15.0
+
+# Optional Dependencies for Enhanced Features
+# Uncomment if needed:
+
+# For Excel file support (future feature)
+# openpyxl>=3.1.0
+# xlsxwriter>=3.1.0
+
+# For advanced data validation
+# email-validator>=2.0.0
+
+# For enhanced data profiling
+# scipy>=1.10.0
+
+# For better date parsing
+# python-dateutil>=2.8.0
+
+# Development Dependencies (optional)
+# pytest>=7.0.0
+# black>=23.0.0
+# flake8>=6.0.0
